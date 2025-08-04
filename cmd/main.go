@@ -10,6 +10,7 @@ import (
 
 	"github.com/jexlor/votingapp/db/store"
 	"github.com/jexlor/votingapp/internal/api"
+	"github.com/jexlor/votingapp/internal/api/middleware"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 
@@ -41,9 +42,11 @@ func main() {
 		log.Fatal("failed to ping db:", err)
 	}
 
-	api := api.Config{
+	a := api.Config{
 		DB: store.New(conn),
 	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
 
 	e := echo.New()
 	v1 := e.Group("/v1")
@@ -54,7 +57,10 @@ func main() {
 	// 	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	// }))
 
-	v1.GET("/comments", api.HandlerGetAllComments)
+	v1.POST("/register", a.HandleRegister)
+	v1.POST("/login", a.HandleLogin)
+	authGroup := v1.Group("", middleware.JWTAuthMiddleware(jwtSecret))
+	authGroup.GET("/comments", a.HandlerGetAllComments)
 
 	if err := e.Start(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)

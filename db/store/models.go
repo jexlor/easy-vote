@@ -14,3 +14,10 @@ type Comment struct {
 	Comment   string
 	CreatedAt sql.NullTime
 }
+
+type User struct {
+	ID           int32
+	Email        string
+	PasswordHash string
+	CreatedAt    sql.NullTime
+}
