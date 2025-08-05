@@ -11,6 +11,7 @@ import (
 	"github.com/jexlor/votingapp/db/store"
 	"github.com/jexlor/votingapp/internal/api"
 	"github.com/jexlor/votingapp/internal/api/middleware"
+	"github.com/jexlor/votingapp/internal/auth"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 
@@ -47,6 +48,7 @@ func main() {
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
+	auth.SetJWTKey(jwtSecret)
 
 	e := echo.New()
 	v1 := e.Group("/v1")
@@ -59,10 +61,16 @@ func main() {
 
 	v1.POST("/register", a.HandleRegister)
 	v1.POST("/login", a.HandleLogin)
-	authGroup := v1.Group("", middleware.JWTAuthMiddleware(jwtSecret))
-	authGroup.GET("/comments", a.HandlerGetAllComments)
+	v1.GET("/comments", a.HandlerGetAllComments)
+	v1.GET("/home", api.HandleHomePage)
+	v1.GET("/register", api.HandleRegisternPage)
+	v1.GET("/login", api.HandleLoginPage)
+	authGroup := v1.Group("", middleware.JWTAuthMiddleware())
+	authGroup.POST("/comments", a.HandlerCreateComment)
 
 	if err := e.Start(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)
 	}
+
+	//TODO: sanitize inputs,html response if not json header, sessions, correct error handling, logging, getcomments by id handler, google auth, rate limiting, docker, nginx.
 }

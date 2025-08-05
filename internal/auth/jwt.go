@@ -7,11 +7,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("test")
+var jwtKey []byte
 
 type Claims struct {
 	UserID int32 `json:"user_id"`
 	jwt.RegisteredClaims
+}
+
+func SetJWTKey(key string) {
+	jwtKey = []byte(key)
 }
 
 func GenerateJWT(userID int32) (string, error) {

@@ -11,8 +11,8 @@ import (
 
 func (s *Config) HandleLogin(c echo.Context) error {
 	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email    string `json:"email" form:"email"`
+		Password string `json:"password" form:"password"`
 	}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
@@ -23,8 +23,9 @@ func (s *Config) HandleLogin(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 	}
 
-	// TODO: compare password hashes (bcrypt.CompareHashAndPassword)
-	// If password matches:
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+	}
 
 	token, err := auth.GenerateJWT(user.ID)
 	if err != nil {
@@ -36,8 +37,8 @@ func (s *Config) HandleLogin(c echo.Context) error {
 
 func (s *Config) HandleRegister(c echo.Context) error {
 	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email    string `json:"email" form:"email"`
+		Password string `json:"password" form:"password"`
 	}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
@@ -55,7 +56,7 @@ func (s *Config) HandleRegister(c echo.Context) error {
 		PasswordHash: string(hashedPassword),
 	})
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusConflict, err)
 	}
 
 	// Return created user info (without password)
