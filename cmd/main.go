@@ -63,8 +63,6 @@ func main() {
 	v1.POST("/login", a.HandleLogin)
 	v1.GET("/comments", a.HandlerGetAllComments)
 	v1.GET("/home", api.HandleHomePage)
-	v1.GET("/register", api.HandleRegisternPage)
-	v1.GET("/login", api.HandleLoginPage)
 	authGroup := v1.Group("", middleware.JWTAuthMiddleware())
 	authGroup.POST("/comments", a.HandlerCreateComment)
 
