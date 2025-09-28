@@ -11,17 +11,34 @@ import (
 func JWTAuthMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			var tokenString string
+
+			// Try Authorization header first
 			authHeader := c.Request().Header.Get("Authorization")
-			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-				return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid Authorization header")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 			}
 
-			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+			// If no header, try cookie
+			if tokenString == "" {
+				cookie, err := c.Cookie("auth_token")
+				if err == nil {
+					tokenString = cookie.Value
+				}
+			}
+
+			// Still empty? Unauthorized
+			if tokenString == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid token")
+			}
+
+			// Parse and validate
 			claims, err := auth.ParseJWT(tokenString)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired token")
 			}
 
+			// Attach user ID to context
 			c.Set("userID", claims.UserID)
 			return next(c)
 		}

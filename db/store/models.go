@@ -6,6 +6,7 @@ package store
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Comment struct {
@@ -13,6 +14,14 @@ type Comment struct {
 	UserID    int32
 	Comment   string
 	CreatedAt sql.NullTime
+}
+
+type CommentReaction struct {
+	ID        int32
+	CommentID int32
+	UserID    int32
+	Reaction  int16
+	CreatedAt time.Time
 }
 
 type User struct {

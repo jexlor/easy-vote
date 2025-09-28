@@ -63,8 +63,12 @@ func main() {
 	v1.POST("/login", a.HandleLogin)
 	v1.GET("/comments", a.HandlerGetAllComments)
 	v1.GET("/home", api.HandleHomePage)
+	v1.GET("/login", api.HandleLoginPage)
+	v1.GET("/register", api.HandleRegisterPage)
 	authGroup := v1.Group("", middleware.JWTAuthMiddleware())
 	authGroup.POST("/comments", a.HandlerCreateComment)
+	authGroup.POST("/comments/:id/delete", a.HandlerDeleteComment)
+	authGroup.POST("/comments/react", a.HandlerReactComment)
 
 	if err := e.Start(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)

@@ -12,11 +12,10 @@ func HandleHomePage(c echo.Context) error {
 }
 
 func HandleLoginPage(c echo.Context) error {
-	templ.Handler(components.LoginForm()).ServeHTTP(c.Response(), c.Request())
+	templ.Handler(components.LoginPage()).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
-
-func HandleRegisternPage(c echo.Context) error {
-	templ.Handler(components.RegisterForm()).ServeHTTP(c.Response(), c.Request())
+func HandleRegisterPage(c echo.Context) error {
+	templ.Handler(components.RegisterPage()).ServeHTTP(c.Response(), c.Request())
 	return nil
 }

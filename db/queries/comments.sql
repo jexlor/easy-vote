@@ -7,3 +7,7 @@ RETURNING *;
 
 -- name: GetCommentByID :one
 SELECT * FROM comments WHERE id = $1;
+
+-- name: DeleteComment :exec
+DELETE FROM comments
+WHERE id = $1 AND user_id = $2;

@@ -14,6 +14,7 @@ func (s *Config) HandleLogin(c echo.Context) error {
 		Email    string `json:"email" form:"email"`
 		Password string `json:"password" form:"password"`
 	}
+
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
@@ -32,6 +33,16 @@ func (s *Config) HandleLogin(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to generate token"})
 	}
 
+	cookie := &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+	}
+	c.SetCookie(cookie)
+
 	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }
 
@@ -44,13 +55,11 @@ func (s *Config) HandleRegister(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
 
-	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to hash password"})
 	}
 
-	// Create user in DB
 	user, err := s.DB.CreateUser(c.Request().Context(), store.CreateUserParams{
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
@@ -58,8 +67,6 @@ func (s *Config) HandleRegister(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusConflict, err)
 	}
-
-	// Return created user info (without password)
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"id":    user.ID,
 		"email": user.Email,
