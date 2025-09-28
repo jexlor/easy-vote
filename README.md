@@ -1,4 +1,4 @@
-just project for fun which is basically identical to what <a>@ThePrimeagen</a> did on stream. (but it's still raw)
+just project for fun which is basically identical to what <a href="https://github.com/ThePrimeagen">ThePrimeagen</a> did on stream. (but it's still raw)
 
 <strong>Ease vote</strong> allowes you to write comments, modify, delete and search through database.
 
@@ -11,3 +11,4 @@ app has <strong>like/dislike</strong> counts which sorts comments and shows the 
 app is completely rendered on server, therefore it uses Templ library along with htmx to render front. <br> another difference is that <strong>Easy vote</strong> is powered by Golang on Echo framework (original is on php/laravel)
 
 project is mostly for portfolio and is not meant to be used in production (even tho with slight modifications it can work there too without any problems)
+
