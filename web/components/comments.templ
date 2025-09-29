@@ -6,65 +6,53 @@ import (
     "github.com/jexlor/votingapp/web/models"
 )
 
-templ CommentsPage(comments []models.CommentWithReactions) {
+templ CommentsPage(comments []models.CommentWithReactions, currentUserID int32) {
     <html>
         <head>
             <title>Comments</title>
-                 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+            <script src="https://unpkg.com/htmx.org@1.9.12"></script>
         </head>
         <body>
             <header><h1>All Comments</h1></header>
 
-            <div class="comments">
-                <ul>
-                    for _, comment :=  range comments {
-                        <li class="comment">
-                            <span class="text">{ comment.Comment }</span>
-                           <div class="actions">
-    <button
-        class="action"
-        hx-post="/v1/comments/react"
-        hx-include="[name='comment_id']"
-        hx-vals='{ "reaction": 1 }'
-        hx-target="#comment-{strconv.Itoa(int(comment.ID))}-reactions"
-        hx-swap="outerHTML">
-        like
-    </button>
-
-    <button
-        class="action"
-        hx-post="/v1/comments/react"
-        hx-include="[name='comment_id']"
-        hx-vals='{ "reaction": -1 }'
-        hx-target="#comment-{strconv.Itoa(int(comment.ID))}-reactions"
-        hx-swap="outerHTML">
-        dislike
-    </button>
-
-    <!-- hidden input to pass comment ID -->
-    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
-
-    <!-- Delete form -->
-    <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
-        <button type="submit" class="action">delete</button>
-    </form>
-</div>
-
-<!-- Reactions count -->
-<div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}>
-    {comment.Likes} 👍 {comment.Dislikes} 👎
-</div>
-
-                        </li>
-                    }
-                </ul>
-            </div>
-
             <div class="add-comment">
-                <form method="POST" action="/v1/comments">
+                <form method="POST" action="/v1/comments" class="add-comment-form">
                     <textarea name="comment"></textarea>
                     <button type="submit">Add Comment</button>
                 </form>
+            </div>
+
+            <div class="comments">
+                <ul>
+                    for _, comment := range comments {
+                        <li class="comment">
+                            <span class="text">{ comment.Comment }</span>
+
+                            <div class="actions">
+                                <form 
+                                    hx-post="/v1/comments/react"
+                                    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
+                                    hx-swap="outerHTML">
+                                    
+                                    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
+
+                                    <button type="submit" class="action" name="reaction" value="1">like</button>
+                                    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
+                                </form>
+
+                                if comment.UserID == currentUserID {
+                                <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
+                                    <button type="submit" class="action">delete</button>
+                                </form>
+                            }
+                            </div>
+
+                            <div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}>
+                                {comment.Likes} 👍 {comment.Dislikes} 👎
+                            </div>
+                        </li>
+                    }
+                </ul>
             </div>
 
             <style>
@@ -75,6 +63,8 @@ templ CommentsPage(comments []models.CommentWithReactions) {
                     margin: 0;
                     padding: 0;
                     display: flex;
+                    justify-content: center;
+                    align-items: center;
                     flex-direction: column;
                     gap: 16px;
                 }
@@ -83,18 +73,22 @@ templ CommentsPage(comments []models.CommentWithReactions) {
                     flex-direction: column;
                     gap: 8px;
                     align-items: flex-start;
-                    max-width: 400px;
+                    max-width: 100%;
                 }
-                .comments li.comment {
-                    display: flex;
-                    flex-direction: column;
-                    padding: 10px 12px;
-                    margin-bottom: 8px;
-                    background-color: #f5f5f5;
-                    border-radius: 6px;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-                    font-size: 14px;
-                    line-height: 1.4;
+              .comments li.comment {
+                display: flex;
+                flex-direction: column;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+                background-color: #f5f5f5;
+                border-radius: 6px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                font-size: 14px;
+                line-height: 1.4;
+                width: 400px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                flex-wrap: nowrap;
                 }
                 .actions {
                     display: flex;
@@ -113,7 +107,7 @@ templ CommentsPage(comments []models.CommentWithReactions) {
                     text-decoration: underline;
                 }
                 .add-comment textarea {
-                    width: 100%;
+                    max-width: 100%;
                     min-height: 80px;
                     padding: 8px;
                     font-size: 14px;
@@ -134,6 +128,18 @@ templ CommentsPage(comments []models.CommentWithReactions) {
                 }
                 .add-comment button:hover {
                     background-color: #0056b3;
+                }
+                .add-comment{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .add-comment form{
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    width: 100%;
+                    max-width: 400px;
                 }
             </style>
 

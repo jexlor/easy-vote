@@ -18,3 +18,12 @@ GROUP BY c.id
 ORDER BY c.created_at DESC;
 
 
+-- name: GetCommentReactionsCount :one
+SELECT
+  COALESCE(SUM(CASE WHEN reaction = 1 THEN 1 ELSE 0 END), 0) AS likes,
+  COALESCE(SUM(CASE WHEN reaction = -1 THEN 1 ELSE 0 END), 0) AS dislikes
+FROM comment_reactions
+WHERE comment_id = $1;
+
+
+

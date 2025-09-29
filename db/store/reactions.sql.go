@@ -80,3 +80,23 @@ func (q *Queries) GetAllCommentsWithReactions(ctx context.Context) ([]GetAllComm
 	}
 	return items, nil
 }
+
+const getCommentReactionsCount = `-- name: GetCommentReactionsCount :one
+SELECT
+  COALESCE(SUM(CASE WHEN reaction = 1 THEN 1 ELSE 0 END), 0) AS likes,
+  COALESCE(SUM(CASE WHEN reaction = -1 THEN 1 ELSE 0 END), 0) AS dislikes
+FROM comment_reactions
+WHERE comment_id = $1
+`
+
+type GetCommentReactionsCountRow struct {
+	Likes    interface{}
+	Dislikes interface{}
+}
+
+func (q *Queries) GetCommentReactionsCount(ctx context.Context, commentID int32) (GetCommentReactionsCountRow, error) {
+	row := q.db.QueryRowContext(ctx, getCommentReactionsCount, commentID)
+	var i GetCommentReactionsCountRow
+	err := row.Scan(&i.Likes, &i.Dislikes)
+	return i, err
+}

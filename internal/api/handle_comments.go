@@ -12,6 +12,8 @@ import (
 )
 
 func (s *Config) HandlerGetAllComments(c echo.Context) error {
+	userID, _ := c.Get("userID").(int32)
+
 	dbComments, err := s.DB.GetAllCommentsWithReactions(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
@@ -28,8 +30,7 @@ func (s *Config) HandlerGetAllComments(c echo.Context) error {
 			Dislikes:  int32(c.Dislikes.(int64)),
 		}
 	}
-
-	templ.Handler(components.CommentsPage(comments)).ServeHTTP(c.Response(), c.Request())
+	templ.Handler(components.CommentsPage(comments, userID)).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
 

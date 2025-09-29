@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/jexlor/votingapp/db/store"
@@ -34,5 +35,13 @@ func (s *Config) HandlerReactComment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to save reaction"})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
+	counts, err := s.DB.GetCommentReactionsCount(c.Request().Context(), req.CommentID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch counts"})
+	}
+
+	html := fmt.Sprintf(`<div id="comment-%d-reactions">%d 👍 %d 👎</div>`,
+		req.CommentID, counts.Likes, counts.Dislikes)
+
+	return c.HTML(http.StatusOK, html)
 }

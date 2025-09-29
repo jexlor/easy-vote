@@ -10,3 +10,8 @@ type CommentWithReactions struct {
 	Likes     int32
 	Dislikes  int32
 }
+
+type GetCommentReactionsCountRow struct {
+	Likes    int32
+	Dislikes int32
+}
