@@ -43,7 +43,9 @@ func (s *Config) HandleLogin(c echo.Context) error {
 	}
 	c.SetCookie(cookie)
 
-	return c.JSON(http.StatusOK, map[string]string{"token": token})
+	c.Response().Header().Set("HX-Redirect", "/v1/comments")
+	return c.NoContent(http.StatusOK)
+
 }
 
 func (s *Config) HandleRegister(c echo.Context) error {
@@ -60,15 +62,13 @@ func (s *Config) HandleRegister(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to hash password"})
 	}
 
-	user, err := s.DB.CreateUser(c.Request().Context(), store.CreateUserParams{
+	_, err = s.DB.CreateUser(c.Request().Context(), store.CreateUserParams{
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
 	})
 	if err != nil {
 		return c.JSON(http.StatusConflict, err)
 	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"id":    user.ID,
-		"email": user.Email,
-	})
+	c.Response().Header().Set("HX-Redirect", "/v1/login")
+	return c.NoContent(http.StatusOK)
 }

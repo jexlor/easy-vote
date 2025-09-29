@@ -6,143 +6,172 @@ import (
     "github.com/jexlor/votingapp/web/models"
 )
 
-templ CommentsPage(comments []models.CommentWithReactions, currentUserID int32) {
-    <html>
+templ CommentsPage(data models.CommentsPageData) {
+    <html lang="en">
         <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Comments</title>
             <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-        </head>
-        <body>
-            <header><h1>All Comments</h1></header>
-
-            <div class="add-comment">
-                <form method="POST" action="/v1/comments" class="add-comment-form">
-                    <textarea name="comment"></textarea>
-                    <button type="submit">Add Comment</button>
-                </form>
-            </div>
-
-            <div class="comments">
-                <ul>
-                    for _, comment := range comments {
-                        <li class="comment">
-                            <span class="text">{ comment.Comment }</span>
-
-                            <div class="actions">
-                                <form 
-                                    hx-post="/v1/comments/react"
-                                    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
-                                    hx-swap="outerHTML">
-                                    
-                                    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
-
-                                    <button type="submit" class="action" name="reaction" value="1">like</button>
-                                    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
-                                </form>
-
-                                if comment.UserID == currentUserID {
-                                <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
-                                    <button type="submit" class="action">delete</button>
-                                </form>
-                            }
-                            </div>
-
-                            <div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}>
-                                {comment.Likes} 👍 {comment.Dislikes} 👎
-                            </div>
-                        </li>
-                    }
-                </ul>
-            </div>
-
             <style>
-                html {
-                    font-family: sans-serif;
-                }
                 body {
                     margin: 0;
-                    padding: 0;
+                    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #6b73ff, #000112);
                     display: flex;
-                    justify-content: center;
+                    flex-direction: column;
+                    justify-content: flex-start;
                     align-items: center;
-                    flex-direction: column;
-                    gap: 16px;
+                    padding: 32px 16px;
+                    min-height: 100vh;
                 }
-                .comments {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    align-items: flex-start;
-                    max-width: 100%;
+
+                header h1 {
+                    color: white;
+                    margin-bottom: 24px;
+                    text-align: center;
                 }
-              .comments li.comment {
-                display: flex;
-                flex-direction: column;
-                padding: 10px 12px;
-                margin-bottom: 8px;
-                background-color: #f5f5f5;
-                border-radius: 6px;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-                font-size: 14px;
-                line-height: 1.4;
-                width: 400px;
-                word-wrap: break-word;
-                overflow-wrap: break-word;
-                flex-wrap: nowrap;
+
+                .comments-container {
+                    width: 100%;
+                    max-width: 500px;
                 }
-                .actions {
-                    display: flex;
-                    flex-direction: row;
-                    gap: 8px;
-                    margin-top: 4px;
+
+                .add-comment {
+                    background: white;
+                    padding: 16px 20px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    margin-bottom: 24px;
+                    width: 100%;
+                    box-sizing: border-box;
                 }
-                .action {
-                    cursor: pointer;
-                    background: none;
-                    border: none;
-                    color: #007bff;
-                    font-size: 12px;
-                }
-                .action:hover {
-                    text-decoration: underline;
-                }
+
                 .add-comment textarea {
-                    max-width: 100%;
+                    width: 100%;
                     min-height: 80px;
-                    padding: 8px;
+                    padding: 10px;
                     font-size: 14px;
-                    border-radius: 4px;
+                    border-radius: 6px;
                     border: 1px solid #ccc;
                     resize: vertical;
                     box-sizing: border-box;
                 }
+
                 .add-comment button {
-                    margin-top: 4px;
-                    padding: 6px 12px;
+                    margin-top: 8px;
+                    padding: 10px;
                     font-size: 14px;
-                    cursor: pointer;
-                    border-radius: 4px;
                     border: none;
-                    background-color: #007bff;
+                    border-radius: 6px;
+                    background-color: #000112;
                     color: white;
+                    cursor: pointer;
+                    transition: background 0.2s;
                 }
+
                 .add-comment button:hover {
-                    background-color: #0056b3;
+                    background-color: #6b73ff;
                 }
-                .add-comment{
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-                .add-comment form{
+
+                .comments {
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
-                    width: 100%;
-                    max-width: 400px;
+                    gap: 12px;
+                }
+
+                .comments li.comment {
+                    background: white;
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    list-style-type: none
+                }
+
+                .comments li.comment .text {
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+
+                .actions {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+
+                .action {
+                    cursor: pointer;
+                    background: none;
+                    border: none;
+                    color: #000112;
+                    font-size: 12px;
+                    font-weight: 600;
+                    transition: color 0.2s;
+                }
+
+                .action:hover {
+                    color: #6b73ff;
+                    text-decoration: underline;
+                }
+
+                #comment-reactions {
+                    margin-top: 4px;
+                    font-size: 13px;
+                    color: #333;
                 }
             </style>
+        </head>
+        <body>
+            <header>
+                <h1>All Comments</h1>
+            </header>
 
+            <div class="comments-container">
+            <div class="add-comment">
+    <form method="POST" action="/v1/comments" class="add-comment-form">
+        if !data.HasCommented {
+            <textarea name="comment" placeholder="Add your comment..."></textarea>
+            <button type="submit">Add Comment</button>
+        } else {
+            <textarea name="comment" placeholder="Add your comment..." disabled></textarea>
+            <button type="submit" disabled>Add Comment</button>
+            <div class="error-message">You’ve already posted a comment.</div>
+        }
+    </form>
+</div>
+
+               <ul class="comments">
+    for _, comment := range data.Comments {
+        <li class="comment">
+            <span class="text">{ comment.Comment }</span>
+            <div class="actions">
+                <form 
+                    hx-post="/v1/comments/react"
+                    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
+                    hx-swap="outerHTML">
+                    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
+                    <button type="submit" class="action" name="reaction" value="1">like</button>
+                    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
+                </form>
+
+                if comment.UserID == data.CurrentUserID {
+                    <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
+                        <button type="submit" class="action">delete</button>
+                    </form>
+                }
+            </div>
+
+            <div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}>
+                {comment.Likes} 👍 {comment.Dislikes} 👎
+            </div>
+        </li>
+    }
+</ul>
+
+            </div>
         </body>
     </html>
 }

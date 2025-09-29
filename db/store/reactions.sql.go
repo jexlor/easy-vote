@@ -39,7 +39,7 @@ SELECT
 FROM comments c
 LEFT JOIN comment_reactions r ON r.comment_id = c.id
 GROUP BY c.id
-ORDER BY c.created_at DESC
+ORDER BY likes DESC, c.created_at DESC
 `
 
 type GetAllCommentsWithReactionsRow struct {

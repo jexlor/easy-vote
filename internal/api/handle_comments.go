@@ -20,6 +20,7 @@ func (s *Config) HandlerGetAllComments(c echo.Context) error {
 	}
 
 	comments := make([]models.CommentWithReactions, len(dbComments))
+	hasCommented := false
 	for i, c := range dbComments {
 		comments[i] = models.CommentWithReactions{
 			ID:        c.ID,
@@ -29,8 +30,17 @@ func (s *Config) HandlerGetAllComments(c echo.Context) error {
 			Likes:     int32(c.Likes.(int64)),
 			Dislikes:  int32(c.Dislikes.(int64)),
 		}
+		if c.UserID == userID {
+			hasCommented = true
+		}
+
 	}
-	templ.Handler(components.CommentsPage(comments, userID)).ServeHTTP(c.Response(), c.Request())
+	data := models.CommentsPageData{
+		Comments:      comments,
+		CurrentUserID: userID,
+		HasCommented:  hasCommented,
+	}
+	templ.Handler(components.CommentsPage(data)).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
 
@@ -50,9 +60,9 @@ func (s *Config) HandlerCreateComment(c echo.Context) error {
 		Comment: comment,
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.HTML(http.StatusOK, `<div class="error">Failed to create comment</div>`)
 	}
-
+	c.Redirect(http.StatusSeeOther, "/v1/comments")
 	return c.JSON(http.StatusCreated, i)
 }
 

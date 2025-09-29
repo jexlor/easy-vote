@@ -29,6 +29,7 @@ func JWTAuthMiddleware() echo.MiddlewareFunc {
 
 			// Still empty? Unauthorized
 			if tokenString == "" {
+				c.Redirect(http.StatusSeeOther, "/v1/login")
 				return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid token")
 			}
 

@@ -61,7 +61,6 @@ func main() {
 
 	v1.POST("/register", a.HandleRegister)
 	v1.POST("/login", a.HandleLogin)
-	v1.GET("/home", api.HandleHomePage)
 	v1.GET("/login", api.HandleLoginPage)
 	v1.GET("/register", api.HandleRegisterPage)
 	authGroup := v1.Group("", middleware.JWTAuthMiddleware())

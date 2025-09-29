@@ -7,19 +7,90 @@ templ LoginPage() {
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Voting App</title>
             <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+            <style>
+                body {
+                    margin: 0;
+                    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #6b73ff, #000112);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    color: #333;
+                }
+
+                #auth-area {
+                    background: white;
+                    padding: 32px 24px;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+                    width: 100%;
+                    max-width: 360px;
+                }
+
+                h1 {
+                    text-align: center;
+                    margin-bottom: 24px;
+                    color: #000112;
+                }
+
+                form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+
+                label {
+                    font-weight: 600;
+                }
+
+                input[type="email"],
+                input[type="password"] {
+                    padding: 10px 12px;
+                    font-size: 14px;
+                    border-radius: 6px;
+                    border: 1px solid #ccc;
+                    width: 100%;
+                    box-sizing: border-box;
+                    transition: border-color 0.2s;
+                }
+
+                input[type="email"]:focus,
+                input[type="password"]:focus {
+                    border-color: #000112;
+                    outline: none;
+                }
+
+                button {
+                    padding: 10px 12px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: none;
+                    border-radius: 6px;
+                    background-color: #000112;
+                    color: white;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                }
+
+                button:hover {
+                    background-color: #6b73ff;
+                }
+            </style>
         </head>
         <body>
             <div id="auth-area">
+                <h1>Login</h1>
                 <form 
                     hx-post="/v1/login" 
                     hx-target="#auth-area"
                     hx-swap="innerHTML"
                 >
                     <label>Username:</label>
-                    <input type="email" name="email" required />
+                    <input type="email" name="email" placeholder="you@example.com" required />
 
                     <label>Password:</label>
-                    <input type="password" name="password" required />
+                    <input type="password" name="password" placeholder="••••••••" required />
 
                     <button type="submit">Login</button>
                 </form>

@@ -15,3 +15,9 @@ type GetCommentReactionsCountRow struct {
 	Likes    int32
 	Dislikes int32
 }
+
+type CommentsPageData struct {
+	Comments      []CommentWithReactions
+	CurrentUserID int32
+	HasCommented  bool
+}
