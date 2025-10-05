@@ -41,7 +41,11 @@ func (s *Config) HandlerGetAllComments(c echo.Context) error {
 		CurrentUserID: userID,
 		HasCommented:  hasCommented,
 	}
-	templ.Handler(components.CommentsPage(data)).ServeHTTP(c.Response(), c.Request())
+	csrfToken := c.Get("csrf").(string)
+	csrfTokenMap := map[string]interface{}{
+		"CSRFToken": csrfToken,
+	}
+	templ.Handler(components.CommentsPage(data, csrfTokenMap)).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
 

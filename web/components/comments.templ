@@ -6,7 +6,7 @@ import (
     "github.com/jexlor/votingapp/web/models"
 )
 
-templ CommentsPage(data models.CommentsPageData) {
+templ CommentsPage(data models.CommentsPageData, csrfToken map[string]interface{}) {
     <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -137,7 +137,7 @@ templ CommentsPage(data models.CommentsPageData) {
             <div class="comments-container">
             <div class="add-comment">
     <form method="POST" action="/v1/comments" class="add-comment-form">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
         if !data.HasCommented {
             <textarea name="comment" placeholder="Add your comment..."></textarea>
             <button type="submit">Add Comment</button>
@@ -165,7 +165,7 @@ templ CommentsPage(data models.CommentsPageData) {
     hx-post="/v1/comments/react"
     hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
     hx-swap="outerHTML">
-    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
     <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
     <button type="submit" class="action" name="reaction" value="1">like</button>
     <button type="submit" class="action" name="reaction" value="-1">dislike</button>
@@ -173,7 +173,7 @@ templ CommentsPage(data models.CommentsPageData) {
 
                 if comment.UserID == data.CurrentUserID {
                    <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
-    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
     <button type="submit" class="action">delete</button>
 </form>
                 }

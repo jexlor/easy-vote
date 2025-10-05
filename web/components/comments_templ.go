@@ -14,7 +14,7 @@ import (
 	"github.com/jexlor/votingapp/web/models"
 )
 
-func CommentsPage(data models.CommentsPageData) templ.Component {
+func CommentsPage(data models.CommentsPageData, csrfToken map[string]interface{}) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,170 +35,209 @@ func CommentsPage(data models.CommentsPageData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Comments</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><style>\n                body {\n                    margin: 0;\n                    font-family: \"Segoe UI\", Tahoma, Geneva, Verdana, sans-serif;\n                    background: linear-gradient(135deg, #6b73ff, #000112);\n                    display: flex;\n                    flex-direction: column;\n                    justify-content: flex-start;\n                    align-items: center;\n                    padding: 32px 16px;\n                    min-height: 100vh;\n                }\n\n                header h1 {\n                    color: white;\n                    margin-bottom: 24px;\n                    text-align: center;\n                }\n\n                .comments-container {\n                    width: 100%;\n                    max-width: 500px;\n                }\n\n                .add-comment {\n                    background: white;\n                    padding: 16px 20px;\n                    border-radius: 12px;\n                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);\n                    margin-bottom: 24px;\n                    width: 100%;\n                    box-sizing: border-box;\n                }\n\n                .add-comment textarea {\n                    width: 100%;\n                    min-height: 80px;\n                    padding: 10px;\n                    font-size: 14px;\n                    border-radius: 6px;\n                    border: 1px solid #ccc;\n                    resize: vertical;\n                    box-sizing: border-box;\n                }\n\n                .add-comment button {\n                    margin-top: 8px;\n                    padding: 10px;\n                    font-size: 14px;\n                    border: none;\n                    border-radius: 6px;\n                    background-color: #000112;\n                    color: white;\n                    cursor: pointer;\n                    transition: background 0.2s;\n                }\n\n                .add-comment button:hover {\n                    background-color: #6b73ff;\n                }\n\n                .comments {\n                    display: flex;\n                    flex-direction: column;\n                    gap: 12px;\n                }\n\n                .comments li.comment {\n                    background: white;\n                    padding: 12px 16px;\n                    border-radius: 12px;\n                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);\n                    word-wrap: break-word;\n                    overflow-wrap: break-word;\n                    list-style-type: none\n                }\n\n                .comments li.comment .text {\n                    margin-bottom: 8px;\n                    font-size: 14px;\n                    line-height: 1.5;\n                }\n\n                .actions {\n                    display: flex;\n                    gap: 8px;\n                    flex-wrap: wrap;\n                }\n\n                .action {\n                    cursor: pointer;\n                    background: none;\n                    border: none;\n                    color: #000112;\n                    font-size: 12px;\n                    font-weight: 600;\n                    transition: color 0.2s;\n                }\n\n                .action:hover {\n                    color: #6b73ff;\n                    text-decoration: underline;\n                }\n\n                #comment-reactions {\n                    margin-top: 4px;\n                    font-size: 13px;\n                    color: #333;\n                }\n                .text-user{\n                    font-weight: bold;\n                    color: #6b73ff;\n                    text-decoration: none;\n                }\n            </style></head><body><header><h1>All Comments</h1></header><div class=\"comments-container\"><div class=\"add-comment\"><form method=\"POST\" action=\"/v1/comments\" class=\"add-comment-form\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Comments</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><style>\n                body {\n                    margin: 0;\n                    font-family: \"Segoe UI\", Tahoma, Geneva, Verdana, sans-serif;\n                    background: linear-gradient(135deg, #6b73ff, #000112);\n                    display: flex;\n                    flex-direction: column;\n                    justify-content: flex-start;\n                    align-items: center;\n                    padding: 32px 16px;\n                    min-height: 100vh;\n                }\n\n                header h1 {\n                    color: white;\n                    margin-bottom: 24px;\n                    text-align: center;\n                }\n\n                .comments-container {\n                    width: 100%;\n                    max-width: 500px;\n                }\n\n                .add-comment {\n                    background: white;\n                    padding: 16px 20px;\n                    border-radius: 12px;\n                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);\n                    margin-bottom: 24px;\n                    width: 100%;\n                    box-sizing: border-box;\n                }\n\n                .add-comment textarea {\n                    width: 100%;\n                    min-height: 80px;\n                    padding: 10px;\n                    font-size: 14px;\n                    border-radius: 6px;\n                    border: 1px solid #ccc;\n                    resize: vertical;\n                    box-sizing: border-box;\n                }\n\n                .add-comment button {\n                    margin-top: 8px;\n                    padding: 10px;\n                    font-size: 14px;\n                    border: none;\n                    border-radius: 6px;\n                    background-color: #000112;\n                    color: white;\n                    cursor: pointer;\n                    transition: background 0.2s;\n                }\n\n                .add-comment button:hover {\n                    background-color: #6b73ff;\n                }\n\n                .comments {\n                    display: flex;\n                    flex-direction: column;\n                    gap: 12px;\n                }\n\n                .comments li.comment {\n                    background: white;\n                    padding: 12px 16px;\n                    border-radius: 12px;\n                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);\n                    word-wrap: break-word;\n                    overflow-wrap: break-word;\n                    list-style-type: none\n                }\n\n                .comments li.comment .text {\n                    margin-bottom: 8px;\n                    font-size: 14px;\n                    line-height: 1.5;\n                }\n\n                .actions {\n                    display: flex;\n                    gap: 8px;\n                    flex-wrap: wrap;\n                }\n\n                .action {\n                    cursor: pointer;\n                    background: none;\n                    border: none;\n                    color: #000112;\n                    font-size: 12px;\n                    font-weight: 600;\n                    transition: color 0.2s;\n                }\n\n                .action:hover {\n                    color: #6b73ff;\n                    text-decoration: underline;\n                }\n\n                #comment-reactions {\n                    margin-top: 4px;\n                    font-size: 13px;\n                    color: #333;\n                }\n                .text-user{\n                    font-weight: bold;\n                    color: #6b73ff;\n                    text-decoration: none;\n                }\n            </style></head><body><header><h1>All Comments</h1></header><div class=\"comments-container\"><div class=\"add-comment\"><form method=\"POST\" action=\"/v1/comments\" class=\"add-comment-form\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken["CSRFToken"].(string))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 140, Col: 86}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !data.HasCommented {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<textarea name=\"comment\" placeholder=\"Add your comment...\"></textarea> <button type=\"submit\">Add Comment</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<textarea name=\"comment\" placeholder=\"Add your comment...\"></textarea> <button type=\"submit\">Add Comment</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<textarea name=\"comment\" placeholder=\"Add your comment...\" disabled></textarea> <button type=\"submit\" disabled>Add Comment</button><div class=\"error-message\">You’ve already posted a comment.</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<textarea name=\"comment\" placeholder=\"Add your comment...\" disabled></textarea> <button type=\"submit\" disabled>Add Comment</button><div class=\"error-message\">You’ve already posted a comment.</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</form></div><ul class=\"comments\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</form></div><ul class=\"comments\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, comment := range data.Comments {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<li class=\"comment\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li class=\"comment\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if comment.UserID == data.CurrentUserID {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<a class=\"text-user\" href=\"#\">User ID:")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var2 string
-				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(comment.UserID)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 155, Col: 63}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " (You)</a><br>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a class=\"text-user\" href=\"#\">User ID:")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a class=\"text-user\" href=\"#\">User ID:")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(comment.UserID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 158, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 156, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " (You)</a><br>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a class=\"text-user\" href=\"#\">User ID:")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(comment.UserID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 159, Col: 66}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<br><span class=\"text\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Comment)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 161, Col: 48}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span><div class=\"actions\"><form hx-post=\"/v1/comments/react\" hx-target=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<br><span class=\"text\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions")
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Comment)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 165, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 162, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"comment_id\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span><div class=\"actions\"><form hx-post=\"/v1/comments/react\" hx-target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(int(comment.ID)))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 167, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 166, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"> <button type=\"submit\" class=\"action\" name=\"reaction\" value=\"1\">like</button> <button type=\"submit\" class=\"action\" name=\"reaction\" value=\"-1\">dislike</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if comment.UserID == data.CurrentUserID {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<form method=\"POST\" action=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><button type=\"submit\" class=\"action\">delete</button></form>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken["CSRFToken"].(string))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 168, Col: 82}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div id=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"> <input type=\"hidden\" name=\"comment_id\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("comment-" + strconv.Itoa(int(comment.ID)) + "-reactions")
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(int(comment.ID)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 179, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 169, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"> <button type=\"submit\" class=\"action\" name=\"reaction\" value=\"1\">like</button> <button type=\"submit\" class=\"action\" name=\"reaction\" value=\"-1\">dislike</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Likes)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 180, Col: 30}
+			if comment.UserID == data.CurrentUserID {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<form method=\"POST\" action=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 templ.SafeURL = templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var9)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken["CSRFToken"].(string))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 176, Col: 82}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"> <button type=\"submit\" class=\"action\">delete</button></form>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><div id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " 👍 ")
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("comment-" + strconv.Itoa(int(comment.ID)) + "-reactions")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 182, Col: 78}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Dislikes)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 180, Col: 54}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " 👎</div></li>")
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Likes)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 183, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " 👍 ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Dislikes)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/components/comments.templ`, Line: 183, Col: 54}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " 👎</div></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</ul></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</ul></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

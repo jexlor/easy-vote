@@ -1,6 +1,6 @@
 package components
 
-templ LoginPage() {
+templ LoginPage(data map[string]interface{}) {
     <html lang="en">
         <head>
             <meta charset="UTF-8" />
@@ -33,7 +33,7 @@ templ LoginPage() {
                     margin-bottom: 24px;
                     color: #000112;
                 }
-
+                
                 form {
                     display: flex;
                     flex-direction: column;
@@ -85,7 +85,9 @@ templ LoginPage() {
                     hx-post="/v1/login" 
                     hx-target="#auth-area"
                     hx-swap="innerHTML"
-                >
+                    
+                >   
+                    <input type="hidden" name="csrf_token" value={ data["CSRFToken"].(string) }>
                     <label>Username:</label>
                     <input type="email" name="email" placeholder="you@example.com" required />
 

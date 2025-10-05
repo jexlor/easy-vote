@@ -86,6 +86,7 @@ templ RegisterPage() {
                     hx-target="#auth-area"
                     hx-swap="innerHTML"
                 >
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <label>Username:</label>
                     <input type="email" name="email" placeholder="you@example.com" required />
 

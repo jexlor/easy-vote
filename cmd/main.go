@@ -58,7 +58,7 @@ func main() {
 		CookieName:     "csrf_token",
 		CookiePath:     "/",
 		CookieMaxAge:   86400,
-		CookieSecure:   false,
+		CookieSecure:   false, // true in production (use HTTPS)
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteLaxMode,
 	}))
