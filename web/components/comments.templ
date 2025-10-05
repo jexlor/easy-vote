@@ -122,6 +122,11 @@ templ CommentsPage(data models.CommentsPageData) {
                     font-size: 13px;
                     color: #333;
                 }
+                .text-user{
+                    font-weight: bold;
+                    color: #6b73ff;
+                    text-decoration: none;
+                }
             </style>
         </head>
         <body>
@@ -132,6 +137,7 @@ templ CommentsPage(data models.CommentsPageData) {
             <div class="comments-container">
             <div class="add-comment">
     <form method="POST" action="/v1/comments" class="add-comment-form">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         if !data.HasCommented {
             <textarea name="comment" placeholder="Add your comment..."></textarea>
             <button type="submit">Add Comment</button>
@@ -146,21 +152,30 @@ templ CommentsPage(data models.CommentsPageData) {
                <ul class="comments">
     for _, comment := range data.Comments {
         <li class="comment">
+         if comment.UserID == data.CurrentUserID {
+         <a class="text-user" href="#">User ID:{ comment.UserID } (You)</a>
+         <br>
+         }  else {
+            <a class="text-user" href="#">User ID:{ comment.UserID }</a>
+         }
+         <br>
             <span class="text">{ comment.Comment }</span>
             <div class="actions">
                 <form 
-                    hx-post="/v1/comments/react"
-                    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
-                    hx-swap="outerHTML">
-                    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
-                    <button type="submit" class="action" name="reaction" value="1">like</button>
-                    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
-                </form>
+    hx-post="/v1/comments/react"
+    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
+    hx-swap="outerHTML">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
+    <button type="submit" class="action" name="reaction" value="1">like</button>
+    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
+</form>
 
                 if comment.UserID == data.CurrentUserID {
-                    <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
-                        <button type="submit" class="action">delete</button>
-                    </form>
+                   <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <button type="submit" class="action">delete</button>
+</form>
                 }
             </div>
 

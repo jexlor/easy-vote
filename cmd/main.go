@@ -14,6 +14,7 @@ import (
 	"github.com/jexlor/votingapp/internal/auth"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	middlewareCSRF "github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/lib/pq"
 )
@@ -51,6 +52,16 @@ func main() {
 	auth.SetJWTKey(jwtSecret)
 
 	e := echo.New()
+
+	e.Use(middlewareCSRF.CSRFWithConfig(middlewareCSRF.CSRFConfig{
+		TokenLookup:    "form:csrf_token",
+		CookieName:     "csrf_token",
+		CookiePath:     "/",
+		CookieMaxAge:   86400,
+		CookieSecure:   false,
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteLaxMode,
+	}))
 	v1 := e.Group("/v1")
 
 	// TODO: configure CORS

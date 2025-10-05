@@ -1,6 +1,7 @@
 package api
 
 import (
+	"html"
 	"net/http"
 	"strconv"
 
@@ -55,6 +56,12 @@ func (s *Config) HandlerCreateComment(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "empty comment"})
 	}
 
+	comment = html.EscapeString(comment)
+
+	if len(comment) > 1000 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "comment too long"})
+	}
+
 	i, err := s.DB.CreateComment(c.Request().Context(), store.CreateCommentParams{
 		UserID:  userID,
 		Comment: comment,
@@ -62,6 +69,7 @@ func (s *Config) HandlerCreateComment(c echo.Context) error {
 	if err != nil {
 		return c.HTML(http.StatusOK, `<div class="error">Failed to create comment</div>`)
 	}
+
 	c.Redirect(http.StatusSeeOther, "/v1/comments")
 	return c.JSON(http.StatusCreated, i)
 }

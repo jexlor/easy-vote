@@ -13,13 +13,11 @@ func JWTAuthMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			var tokenString string
 
-			// Try Authorization header first
 			authHeader := c.Request().Header.Get("Authorization")
 			if strings.HasPrefix(authHeader, "Bearer ") {
 				tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 			}
 
-			// If no header, try cookie
 			if tokenString == "" {
 				cookie, err := c.Cookie("auth_token")
 				if err == nil {
@@ -27,7 +25,6 @@ func JWTAuthMiddleware() echo.MiddlewareFunc {
 				}
 			}
 
-			// Still empty? Unauthorized
 			if tokenString == "" {
 				c.Redirect(http.StatusSeeOther, "/v1/login")
 				return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid token")
