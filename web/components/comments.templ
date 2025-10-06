@@ -1,192 +1,125 @@
 package components
 
 import (
-    "strconv"
-
-    "github.com/jexlor/votingapp/web/models"
+	"strconv"
+	"github.com/jexlor/votingapp/web/models"
 )
 
 templ CommentsPage(data models.CommentsPageData, csrfToken map[string]interface{}) {
-    <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Comments</title>
-            <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-            <style>
-                body {
-                    margin: 0;
-                    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-                    background: linear-gradient(135deg, #6b73ff, #000112);
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-start;
-                    align-items: center;
-                    padding: 32px 16px;
-                    min-height: 100vh;
-                }
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Comments</title>
+	<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
 
-                header h1 {
-                    color: white;
-                    margin-bottom: 24px;
-                    text-align: center;
-                }
+	<!-- Header -->
+	<header class="bg-white border-b border-gray-200 shadow-sm">
+		<div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+			<h1 class="font-semibold text-lg">VotingApp</h1>
+			<h2 class="text-sm text-gray-500">Comments</h2>
+		</div>
+	</header>
 
-                .comments-container {
-                    width: 100%;
-                    max-width: 500px;
-                }
+	<main class="flex-1 max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                .add-comment {
-                    background: white;
-                    padding: 16px 20px;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                    margin-bottom: 24px;
-                    width: 100%;
-                    box-sizing: border-box;
-                }
+		<section>
+			<div class="bg-white rounded-2xl shadow p-5 mb-6">
+				<h3 class="text-lg font-semibold mb-3">Add Comment</h3>
+				<form method="POST" action="/v1/comments" class="space-y-3">
+					<input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
 
-                .add-comment textarea {
-                    width: 100%;
-                    min-height: 80px;
-                    padding: 10px;
-                    font-size: 14px;
-                    border-radius: 6px;
-                    border: 1px solid #ccc;
-                    resize: vertical;
-                    box-sizing: border-box;
-                }
+					if !data.HasCommented {
+						<textarea 
+							name="comment" 
+							placeholder="Add your comment..." 
+							class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none min-h-[80px]"
+						></textarea>
+						<button 
+							type="submit" 
+							class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+							Submit
+						</button>
+					} else {
+						<textarea 
+							name="comment" 
+							placeholder="You’ve already posted a comment." 
+							disabled
+							class="w-full border border-gray-200 bg-gray-100 rounded-lg px-3 py-2 text-sm resize-none min-h-[80px]"
+						></textarea>
+						<button 
+							type="submit" 
+                            disabled
+							class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed">
+							Submit
+						</button>
+					}
+				</form>
+			</div>
 
-                .add-comment button {
-                    margin-top: 8px;
-                    padding: 10px;
-                    font-size: 14px;
-                    border: none;
-                    border-radius: 6px;
-                    background-color: #000112;
-                    color: white;
-                    cursor: pointer;
-                    transition: background 0.2s;
+			<h3 class="font-semibold text-xl mb-4">Hot Comments</h3>
+<ul class="flex flex-wrap justify-center gap-4">
+    for _, comment := range data.Comments {
+        <li class="bg-white rounded-2xl shadow p-4 flex-1 min-w-[200px] max-w-[300px]">
+            <div class="flex justify-between items-center mb-1">
+                if comment.UserID == data.CurrentUserID {
+                    <span class="font-semibold text-indigo-600">User ID: { comment.UserID } (You)</span>
+                } else {
+                    <span class="font-semibold text-gray-700">User ID: { comment.UserID }</span>
                 }
+            </div>
 
-                .add-comment button:hover {
-                    background-color: #6b73ff;
-                }
+            <p class="text-sm text-gray-800 mb-3">{ comment.Comment }</p>
 
-                .comments {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                }
-
-                .comments li.comment {
-                    background: white;
-                    padding: 12px 16px;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                    list-style-type: none
-                }
-
-                .comments li.comment .text {
-                    margin-bottom: 8px;
-                    font-size: 14px;
-                    line-height: 1.5;
-                }
-
-                .actions {
-                    display: flex;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                }
-
-                .action {
-                    cursor: pointer;
-                    background: none;
-                    border: none;
-                    color: #000112;
-                    font-size: 12px;
-                    font-weight: 600;
-                    transition: color 0.2s;
-                }
-
-                .action:hover {
-                    color: #6b73ff;
-                    text-decoration: underline;
-                }
-
-                #comment-reactions {
-                    margin-top: 4px;
-                    font-size: 13px;
-                    color: #333;
-                }
-                .text-user{
-                    font-weight: bold;
-                    color: #6b73ff;
-                    text-decoration: none;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <h1>All Comments</h1>
-            </header>
-
-            <div class="comments-container">
-            <div class="add-comment">
-    <form method="POST" action="/v1/comments" class="add-comment-form">
+<div class="flex items-center gap-3 text-gray-500 text-sm">
+    <form 
+        hx-post="/v1/comments/react"
+        hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
+        hx-swap="outerHTML"
+        class="flex items-center gap-2"
+    >
         <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
-        if !data.HasCommented {
-            <textarea name="comment" placeholder="Add your comment..."></textarea>
-            <button type="submit">Add Comment</button>
-        } else {
-            <textarea name="comment" placeholder="Add your comment..." disabled></textarea>
-            <button type="submit" disabled>Add Comment</button>
-            <div class="error-message">You’ve already posted a comment.</div>
-        }
+        <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
+
+        <!-- Thumbs Up -->
+        <button type="submit" name="reaction" value="1" class="hover:text-indigo-600">
+            <i class="fa-solid fa-thumbs-up w-5 h-5"></i>
+        </button>
+
+        <!-- Thumbs Down -->
+        <button type="submit" name="reaction" value="-1" class="hover:text-red-600">
+            <i class="fa-solid fa-thumbs-down w-5 h-5"></i>
+        </button>
     </form>
+
+    if comment.UserID == data.CurrentUserID {
+        <form 
+            method="POST" 
+            action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}
+            class="flex items-center"
+        >
+            <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
+            <button type="submit" class="hover:text-red-500">
+                <i class="fa-solid fa-trash w-5 h-5"></i>
+            </button>
+        </form>
+    }
+
+    <div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"} class="ml-auto text-xs text-gray-500">
+        {comment.Likes} <i class="fa-solid fa-thumbs-up inline w-3 h-3"></i> 
+        {comment.Dislikes} <i class="fa-solid fa-thumbs-down inline w-3 h-3"></i>
+    </div>
 </div>
 
-               <ul class="comments">
-    for _, comment := range data.Comments {
-        <li class="comment">
-         if comment.UserID == data.CurrentUserID {
-         <a class="text-user" href="#">User ID:{ comment.UserID } (You)</a>
-         <br>
-         }  else {
-            <a class="text-user" href="#">User ID:{ comment.UserID }</a>
-         }
-         <br>
-            <span class="text">{ comment.Comment }</span>
-            <div class="actions">
-                <form 
-    hx-post="/v1/comments/react"
-    hx-target={"#comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}
-    hx-swap="outerHTML">
-    <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
-    <input type="hidden" name="comment_id" value={strconv.Itoa(int(comment.ID))}>
-    <button type="submit" class="action" name="reaction" value="1">like</button>
-    <button type="submit" class="action" name="reaction" value="-1">dislike</button>
-</form>
-
-                if comment.UserID == data.CurrentUserID {
-                   <form method="POST" action={templ.SafeURL("/v1/comments/" + strconv.Itoa(int(comment.ID)) + "/delete")}>
-    <input type="hidden" name="csrf_token" value={ csrfToken["CSRFToken"].(string) }>
-    <button type="submit" class="action">delete</button>
-</form>
-                }
-            </div>
-
-            <div id={"comment-" + strconv.Itoa(int(comment.ID)) + "-reactions"}>
-                {comment.Likes} 👍 {comment.Dislikes} 👎
-            </div>
         </li>
     }
 </ul>
-
-            </div>
-        </body>
-    </html>
+		</section>
+	</main>
+        <script src="https://kit.fontawesome.com/cf852e3d0e.js" crossorigin="anonymous"></script>
+</body>
+</html>
 }

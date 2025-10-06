@@ -86,7 +86,7 @@ func (s *Config) HandleRegister(c echo.Context) error {
 
 	if !isStrongPassword(req.Password) {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "password must be 8 chars, include uppercase, lowercase, and a number",
+			"error": "password must be at least 8 chars not more than 64, include uppercase, lowercase, and a number",
 		})
 	}
 

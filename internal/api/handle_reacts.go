@@ -40,8 +40,13 @@ func (s *Config) HandlerReactComment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch counts"})
 	}
 
-	html := fmt.Sprintf(`<div id="comment-%d-reactions">%d 👍 %d 👎</div>`,
-		req.CommentID, counts.Likes, counts.Dislikes)
+	html := fmt.Sprintf(
+		`<div id="comment-%d-reactions" class="ml-auto text-xs text-gray-500">
+        %d <i class="fa-solid fa-thumbs-up inline w-3 h-3"></i> 
+        %d <i class="fa-solid fa-thumbs-down inline w-3 h-3"></i>
+    </div>`,
+		req.CommentID, counts.Likes, counts.Dislikes,
+	)
 
 	return c.HTML(http.StatusOK, html)
 }

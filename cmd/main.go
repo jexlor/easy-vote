@@ -53,6 +53,8 @@ func main() {
 
 	e := echo.New()
 
+	e.Static("/icons", "web/icons")
+
 	e.Use(middlewareCSRF.CSRFWithConfig(middlewareCSRF.CSRFConfig{
 		TokenLookup:    "form:csrf_token",
 		CookieName:     "csrf_token",
