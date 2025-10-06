@@ -15,6 +15,10 @@ func HandleLoginPage(c echo.Context) error {
 	return nil
 }
 func HandleRegisterPage(c echo.Context) error {
-	templ.Handler(components.RegisterPage()).ServeHTTP(c.Response(), c.Request())
+	csrfToken := c.Get("csrf").(string)
+	data := map[string]interface{}{
+		"CSRFToken": csrfToken,
+	}
+	templ.Handler(components.RegisterPage(data)).ServeHTTP(c.Response(), c.Request())
 	return nil
 }

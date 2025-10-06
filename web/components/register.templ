@@ -1,6 +1,6 @@
 package components
 
-templ RegisterPage() {
+templ RegisterPage(data map[string]interface{}) {
     <html lang="en">
         <head>
             <meta charset="UTF-8" />
@@ -86,7 +86,8 @@ templ RegisterPage() {
                     hx-target="#auth-area"
                     hx-swap="innerHTML"
                 >
-                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    
+                    <input type="hidden" name="csrf_token" value={ data["CSRFToken"].(string) }>
                     <label>Username:</label>
                     <input type="email" name="email" placeholder="you@example.com" required />
 
