@@ -11,7 +11,7 @@ templ RegisterPage(data map[string]interface{}) {
                 body {
                     margin: 0;
                     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-                    background: linear-gradient(135deg, #6b73ff, #000112);
+                    background: black;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -88,7 +88,7 @@ templ RegisterPage(data map[string]interface{}) {
                 >
                     
                     <input type="hidden" name="csrf_token" value={ data["CSRFToken"].(string) }>
-                    <label>Username:</label>
+                    <label>Email:</label>
                     <input type="email" name="email" placeholder="you@example.com" required />
 
                     <label>Password:</label>
