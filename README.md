@@ -14,6 +14,9 @@ project is mostly for portfolio and is not meant to be used in production (even 
 
 
 <img width="1920" height="953" alt="screencapture-localhost-8080-v1-comments-2025-10-09-18_00_00" src="https://github.com/user-attachments/assets/2f135940-c1ae-4863-b65a-7f55d5e010e4" />
+<img width="452" height="958" alt="image" src="https://github.com/user-attachments/assets/5e3588a8-1df5-4cfe-b62d-a2df62879142" />
+
+
 
 
 
