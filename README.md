@@ -12,9 +12,7 @@ app is completely rendered on server, therefore it uses Templ library along with
 
 project is mostly for portfolio and is not meant to be used in production (even tho with slight modifications it can work there too without any problems)
 
-Here's example of unpolished working UI
 
-<img width="1920" height="953" alt="screencapture-localhost-8080-v1-comments-2025-10-09-18_00_00" src="https://github.com/user-attachments/assets/2f135940-c1ae-4863-b65a-7f55d5e010e4" />
 
 
 
