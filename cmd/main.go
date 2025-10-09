@@ -77,6 +77,7 @@ func main() {
 	authGroup := v1.Group("", middleware.JWTAuthMiddleware())
 	authGroup.GET("/comments", a.HandlerGetAllComments)
 	authGroup.POST("/comments", a.HandlerCreateComment)
+	authGroup.GET("/comments/search", a.HandlerGetCommentsBySearch)
 	authGroup.POST("/comments/:id/delete", a.HandlerDeleteComment)
 	authGroup.POST("/comments/react", a.HandlerReactComment)
 

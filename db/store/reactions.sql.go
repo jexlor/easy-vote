@@ -81,6 +81,59 @@ func (q *Queries) GetAllCommentsWithReactions(ctx context.Context) ([]GetAllComm
 	return items, nil
 }
 
+const getAllCommentsWithReactionsTime = `-- name: GetAllCommentsWithReactionsTime :many
+SELECT
+    c.id,
+    c.user_id,
+    c.comment,
+    c.created_at,
+    COALESCE(SUM((CASE WHEN r.reaction = 1 THEN 1 ELSE 0 END)::int4), 0) AS likes,
+    COALESCE(SUM((CASE WHEN r.reaction = -1 THEN 1 ELSE 0 END)::int4), 0) AS dislikes
+FROM comments c
+LEFT JOIN comment_reactions r ON r.comment_id = c.id
+GROUP BY c.id
+ORDER BY c.created_at DESC
+`
+
+type GetAllCommentsWithReactionsTimeRow struct {
+	ID        int32
+	UserID    int32
+	Comment   string
+	CreatedAt sql.NullTime
+	Likes     interface{}
+	Dislikes  interface{}
+}
+
+func (q *Queries) GetAllCommentsWithReactionsTime(ctx context.Context) ([]GetAllCommentsWithReactionsTimeRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCommentsWithReactionsTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllCommentsWithReactionsTimeRow
+	for rows.Next() {
+		var i GetAllCommentsWithReactionsTimeRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Comment,
+			&i.CreatedAt,
+			&i.Likes,
+			&i.Dislikes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCommentReactionsCount = `-- name: GetCommentReactionsCount :one
 SELECT
   COALESCE(SUM(CASE WHEN reaction = 1 THEN 1 ELSE 0 END), 0) AS likes,
@@ -99,4 +152,58 @@ func (q *Queries) GetCommentReactionsCount(ctx context.Context, commentID int32)
 	var i GetCommentReactionsCountRow
 	err := row.Scan(&i.Likes, &i.Dislikes)
 	return i, err
+}
+
+const getCommentsBySearch = `-- name: GetCommentsBySearch :many
+SELECT
+    c.id,
+    c.user_id,
+    c.comment,
+    c.created_at,
+    COALESCE(SUM(CASE WHEN r.reaction = 1 THEN 1 ELSE 0 END), 0) AS likes,
+    COALESCE(SUM(CASE WHEN r.reaction = -1 THEN 1 ELSE 0 END), 0) AS dislikes
+FROM comments c
+LEFT JOIN comment_reactions r ON r.comment_id = c.id
+WHERE c.comment ILIKE '%' || $1 || '%'
+GROUP BY c.id
+ORDER BY likes DESC, c.created_at DESC
+`
+
+type GetCommentsBySearchRow struct {
+	ID        int32
+	UserID    int32
+	Comment   string
+	CreatedAt sql.NullTime
+	Likes     interface{}
+	Dislikes  interface{}
+}
+
+func (q *Queries) GetCommentsBySearch(ctx context.Context, dollar_1 sql.NullString) ([]GetCommentsBySearchRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCommentsBySearch, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCommentsBySearchRow
+	for rows.Next() {
+		var i GetCommentsBySearchRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Comment,
+			&i.CreatedAt,
+			&i.Likes,
+			&i.Dislikes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

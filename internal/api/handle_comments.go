@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"html"
 	"net/http"
 	"strconv"
@@ -14,28 +15,55 @@ import (
 
 func (s *Config) HandlerGetAllComments(c echo.Context) error {
 	userID, _ := c.Get("userID").(int32)
+	sort := c.QueryParam("sort")
 
-	dbCommentsReactions, err := s.DB.GetAllCommentsWithReactions(c.Request().Context())
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
-	}
-
-	comments := make([]models.CommentWithReactions, len(dbCommentsReactions))
+	var comments []models.CommentWithReactions
 	hasCommented := false
-	for i, c := range dbCommentsReactions {
-		comments[i] = models.CommentWithReactions{
-			ID:        c.ID,
-			UserID:    c.UserID,
-			Comment:   c.Comment,
-			CreatedAt: c.CreatedAt.Time,
-			Likes:     int32(c.Likes.(int64)),
-			Dislikes:  int32(c.Dislikes.(int64)),
-		}
-		if c.UserID == userID {
-			hasCommented = true
+
+	switch sort {
+	case "newest":
+		dbCommentsReactionsTime, err := s.DB.GetAllCommentsWithReactionsTime(c.Request().Context())
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
 		}
 
+		comments = make([]models.CommentWithReactions, len(dbCommentsReactionsTime))
+		for i, r := range dbCommentsReactionsTime {
+			comments[i] = models.CommentWithReactions{
+				ID:        r.ID,
+				UserID:    r.UserID,
+				Comment:   r.Comment,
+				CreatedAt: r.CreatedAt.Time,
+				Likes:     int32(r.Likes.(int64)),
+				Dislikes:  int32(r.Dislikes.(int64)),
+			}
+			if r.UserID == userID {
+				hasCommented = true
+			}
+		}
+
+	default: // sort=liked or none
+		dbCommentsReactions, err := s.DB.GetAllCommentsWithReactions(c.Request().Context())
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
+		}
+
+		comments = make([]models.CommentWithReactions, len(dbCommentsReactions))
+		for i, r := range dbCommentsReactions {
+			comments[i] = models.CommentWithReactions{
+				ID:        r.ID,
+				UserID:    r.UserID,
+				Comment:   r.Comment,
+				CreatedAt: r.CreatedAt.Time,
+				Likes:     int32(r.Likes.(int64)),
+				Dislikes:  int32(r.Dislikes.(int64)),
+			}
+			if r.UserID == userID {
+				hasCommented = true
+			}
+		}
 	}
+
 	data := models.CommentsPageData{
 		Comments:      comments,
 		CurrentUserID: userID,
@@ -43,21 +71,56 @@ func (s *Config) HandlerGetAllComments(c echo.Context) error {
 	}
 
 	csrfToken := c.Get("csrf").(string)
-	csrfTokenMap := map[string]interface{}{
-		"CSRFToken": csrfToken,
-	}
+	csrfTokenMap := map[string]interface{}{"CSRFToken": csrfToken}
+
 	templ.Handler(components.CommentsPage(data, csrfTokenMap)).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
 
-// func (s *Config) HandlerGetCommentsByTime(c echo.Context) error {
-// 	//retrieving comments which are ordered by time
+func (s *Config) HandlerGetCommentsBySearch(c echo.Context) error {
+	userID, _ := c.Get("userID").(int32)
+	query := c.QueryParam("q")
+	if query == "" {
+		return c.Redirect(http.StatusSeeOther, "/v1/comments")
+	}
 
-// 	dbComments, err := s.DB.GetAllComments(c.Request().Context())
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
-// 	}
-// }
+	hasCommented := false
+
+	dbCommentsReactions, err := s.DB.GetCommentsBySearch(c.Request().Context(), sql.NullString{
+		String: query,
+		Valid:  true,
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to retrieve comments"})
+	}
+
+	comments := make([]models.CommentWithReactions, len(dbCommentsReactions))
+	for i, r := range dbCommentsReactions {
+		comments[i] = models.CommentWithReactions{
+			ID:        r.ID,
+			UserID:    r.UserID,
+			Comment:   r.Comment,
+			CreatedAt: r.CreatedAt.Time,
+			Likes:     int32(r.Likes.(int64)),
+			Dislikes:  int32(r.Dislikes.(int64)),
+		}
+		if r.UserID == userID {
+			hasCommented = true
+		}
+	}
+
+	data := models.CommentsPageData{
+		Comments:      comments,
+		CurrentUserID: userID,
+		HasCommented:  hasCommented,
+	}
+
+	csrfToken := c.Get("csrf").(string)
+	csrfTokenMap := map[string]interface{}{"CSRFToken": csrfToken}
+
+	templ.Handler(components.CommentsPage(data, csrfTokenMap)).ServeHTTP(c.Response(), c.Request())
+	return nil
+}
 
 func (s *Config) HandlerCreateComment(c echo.Context) error {
 	userID, ok := c.Get("userID").(int32)
