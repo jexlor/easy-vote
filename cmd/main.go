@@ -64,11 +64,22 @@ func main() {
 	}))
 	v1 := e.Group("/v1")
 
-	// TODO: configure CORS
-	// v1.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
-	// 	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	// }))
+	v1.Use(middlewareCSRF.CORSWithConfig(middlewareCSRF.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+		},
+		AllowMethods: []string{
+			echo.GET,
+			echo.POST,
+			echo.PUT,
+			echo.DELETE,
+			echo.OPTIONS,
+		},
+	}))
 
 	v1.POST("/register", a.HandleRegister)
 	v1.POST("/login", a.HandleLogin)
